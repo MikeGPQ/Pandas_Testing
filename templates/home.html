@@ -1,0 +1,15 @@
+<html>
+   <body>
+      <form action="/uploadfile" method="post" enctype="multipart/form-data">
+         <p>Main Page</p>
+         <input type="file" name="dataFile" accept=".csv,.xlsx,.json,.html">
+         <input type="submit" value="Upload">
+      </form>
+
+      {% if table %}
+         <hr>
+         <h2>Data Frame</h2>
+         {{ table | safe}}
+      {% endif %}
+   </body>
+</html>
