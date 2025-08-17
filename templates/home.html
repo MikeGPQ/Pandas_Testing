@@ -1,15 +1,59 @@
 <html>
    <body>
-      <form action="/uploadfile" method="post" enctype="multipart/form-data">
-         <p>Main Page</p>
-         <input type="file" name="dataFile" accept=".csv,.xlsx,.json,.html">
-         <input type="submit" value="Upload">
-      </form>
+      {% if table == None %}
+         <form action="/" method="post" enctype="multipart/form-data">
+            <p>Main Page</p>
+            <input type="file" name="dataFile" accept=".csv,.xlsx,.json,.html">
+            <input type="submit" name="action" value="Upload">
+         </form>
+      {% endif %}
 
       {% if table %}
-         <hr>
-         <h2>Data Frame</h2>
-         {{ table | safe}}
+         <form action="/" method="post" enctype="multipart/form-data">
+            <p>Data Frame</p>
+            {{ table | safe}}
+            <input type="submit" name="action" value="Delete">
+            <input type="submit" name="action" value="Restore">
+         </form>
+
+         <p> Export As: </p>
+         <a href="/export/csv">
+            <button> Export CSV </button>
+         </a>
+         <a href="/export/xlsx">
+            <button> Export XLSX </button>
+         </a>
+         <a href="/export/json">
+            <button> Export JSON </button>
+         </a>
+         <a href="/export/html">
+            <button> Export HTML </button>
+         </a>
+
+         <form action="/" method="post" enctype="multipart/form-data">
+            <p> Filters: </p>
+            <label>
+               What row do you want to Sort ?
+               <input type="submit" name="action" value="Sort">
+               <input type="text" id="sortColumn" name="sortColumn">
+               <select name="ascendingOption" id="ascendingOption">
+                  <option value="Ascending"> Ascending </option>
+                  <option value="Descending"> Descending </option>
+               </select>
+            </label>
+         </form>
+
+         <form action="/" method="post" enctype="multipart/form-data">
+            <p> Filters: </p>
+            <label>
+               What do you wanna filer ?
+               <input type="submit" name="action" value="Filter">
+               <input type="text" id="filterValue" name="filterValue" placeholder="Value">
+               <input type="text" id="filterColumn" name="filterColumn" placeholder="Column">
+            </label>
+         </form>
+         
+
       {% endif %}
    </body>
 </html>

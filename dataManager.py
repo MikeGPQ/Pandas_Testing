@@ -1,5 +1,6 @@
 import pandas
 import os
+import io
 
 class dataManager:
     def __init__(self):
@@ -13,7 +14,9 @@ class dataManager:
             case ".json":
                 self.dataFrame = pandas.read_json(file)
             case ".html":
-                self.dataFrame = pandas.read_html(file)
+                htmlFile = file.read().decode("utf-8")
+                self.dataFrame = pandas.read_html(io.StringIO(htmlFile))[0]
+        
 
-    def getHTML(self):
-        return self.dataFrame.to_html(classes='table table-striped')
+
+    
