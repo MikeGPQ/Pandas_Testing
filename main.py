@@ -1,27 +1,24 @@
-from dataManager import dataManager
 from flask import Flask, render_template, request, Response
 import io
 import pandas
+import os
+from dataManager import dataManager 
 
 dm = dataManager()
-restored = dataManager()
 
 app = Flask(__name__)
 @app.route('/',methods=["GET","POST"])
 def loading():
+    button = False
     if request.method=="POST":
         if "action" in request.form:
             match request.form["action"]:
                 case "Upload":
                     dm.setData(request.files["dataFile"])
-                    restored.dataFrame = dm.dataFrame
-                    return render_template("home.html",table=dm.dataFrame.to_html()) 
                 case "Delete":
-                    dm.dataFrame = None
-                    return render_template("home.html",table=None)
+                    dm.dataFrame = pandas.DataFrame()
                 case "Restore":
-                    dm.dataFrame = restored.dataFrame
-                    return render_template("home.html",table=dm.dataFrame.to_html()) 
+                    dm.dataFrame = dm.copy
                 case "Sort":
                     sortColumn = request.form.get("sortColumn")
                     if(request.form.get("ascendingOption")=="Ascending"):
@@ -29,13 +26,27 @@ def loading():
                     else:
                         ascendingOption = False
                     dm.dataFrame = dm.dataFrame.sort_values(by=sortColumn, ascending=ascendingOption)
-                    return render_template("home.html",table=dm.dataFrame.to_html()) 
                 case "Filter":
                     filterValue = request.form.get("filterValue")
                     filterColumn = request.form.get("filterColumn")
-                    dm.dataFrame = dm.dataFrame[dm.dataFrame[filterColumn] == filterValue]
-                    return render_template("home.html",table=dm.dataFrame.to_html()) 
-    return render_template("home.html",table=None)
+                    if(button == True):
+                        filterValue2 = request.form.get("filterValue2")
+                        print(filterValue, filterValue2,filterColumn)
+                        dm.dataFrame = dm.dataFrame[dm.dataFrame[filterColumn].isin([filterValue,filterValue2])]
+                    else:
+                        dm.dataFrame = dm.dataFrame[dm.dataFrame[filterColumn] == filterValue]
+                    button = False
+                case "Add+":
+                    button = True
+                case "toNumeric":
+                    toNumericColumn = request.form.get("toNumericColumn")
+                    dm.dataFrame[toNumericColumn] = pandas.to_numeric(dm.dataFrame[toNumericColumn],errors="coerce")
+                case "fillColumn":
+                    fillColumn = request.form.get("fillColumn")
+                    dm.fixMissingValue(fillColumn)
+                case "removeDuplicates":
+                    dm.dataFrame = dm.dataFrame.drop_duplicates()
+    return render_template("home.html",table=dm.getHTML(),button=button,columns = dm.getColumns())
 
 @app.route("/export/<format>")
 def exportFile(format):
@@ -59,6 +70,7 @@ def exportFile(format):
 
 if __name__ == '__main__':
     app.run()
+
 
 
 

@@ -9,12 +9,11 @@
       {% endif %}
 
       {% if table %}
-         <form action="/" method="post" enctype="multipart/form-data">
-            <p>Data Frame</p>
-            {{ table | safe}}
-            <input type="submit" name="action" value="Delete">
-            <input type="submit" name="action" value="Restore">
-         </form>
+      <form action="/" method="post" enctype="multipart/form-data">
+         <p>Data Frame</p>
+         {{ table | safe}}
+         <input type="submit" name="action" value="Delete">
+         <input type="submit" name="action" value="Restore">
 
          <p> Export As: </p>
          <a href="/export/csv">
@@ -29,31 +28,66 @@
          <a href="/export/html">
             <button> Export HTML </button>
          </a>
-
-         <form action="/" method="post" enctype="multipart/form-data">
-            <p> Filters: </p>
-            <label>
-               What row do you want to Sort ?
-               <input type="submit" name="action" value="Sort">
-               <input type="text" id="sortColumn" name="sortColumn">
-               <select name="ascendingOption" id="ascendingOption">
-                  <option value="Ascending"> Ascending </option>
-                  <option value="Descending"> Descending </option>
-               </select>
-            </label>
-         </form>
-
-         <form action="/" method="post" enctype="multipart/form-data">
-            <p> Filters: </p>
-            <label>
-               What do you wanna filer ?
-               <input type="submit" name="action" value="Filter">
-               <input type="text" id="filterValue" name="filterValue" placeholder="Value">
-               <input type="text" id="filterColumn" name="filterColumn" placeholder="Column">
-            </label>
-         </form>
+        
+         <p> Sort and Filters: </p>
+         <label>
+            What row do you want to Sort ?
+            <input type="submit" name="action" value="Sort">
+            <select id="sortColumn" name="sortColumn">
+               {% for column in columns %}
+               <option value="{{column}}"> {{column}} </option>
+               {% endfor %}
+            </select>
+            <select name="ascendingOption" id="ascendingOption">
+               <option value="Ascending"> Ascending </option>
+               <option value="Descending"> Descending </option>
+            </select>
+         </label>
          
+         <p> </p>
+         <label>
+            What do you wanna filter ?
+            <select id="filterColumn" name="filterColumn">
+               {% for column in columns %}
+               <option value="{{column}}"> {{column}} </option>
+               {% endfor %}
+            </select>
+            <input type="submit" name="action" value="Filter">
+            <input type="submit" name="action" value="Add+">
+            <input type="text" id="filterValue" name="filterValue" placeholder="Value">
+            {% if button %}
+            <input type="text" id="filterValue2" name="filterValue2" placeholder="Second Value">
+            {% endif %}
+         </label>
 
-      {% endif %}
+         <p> Clean wrong formated or empty rows </p>
+         <label>
+            What column has text instead of numbers ?
+            <select id="toNumericColumn" name="toNumericColumn">
+               {% for column in columns %}
+               <option value="{{column}}"> {{column}} </option>
+               {% endfor %}
+            </select>
+            <input type="submit" name="action" value="toNumeric">
+         </label>
+
+         <p>  </p>
+         <label>
+            What column has an empty row ? We can fill it with the most popular value in the row
+            <select id="fillColumn" name="fillColumn">
+               {% for column in columns %}
+               <option value="{{column}}"> {{column}} </option>
+               {% endfor %}
+            </select>
+            <input type="submit" name="action" value="fillColumn">
+         </label>
+
+         <p></p>
+         <label>
+            Want to remove duplicate registers?
+            <input type="submit" name="action" value="removeDuplicates">
+
+         </label>
+      </form> {% endif %}
    </body>
 </html>
