@@ -1,93 +1,177 @@
-<html>
-   <body>
-      {% if table == None %}
-         <form action="/" method="post" enctype="multipart/form-data">
-            <p>Main Page</p>
-            <input type="file" name="dataFile" accept=".csv,.xlsx,.json,.html">
-            <input type="submit" name="action" value="Upload">
-         </form>
-      {% endif %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Manager App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 1200px;
+            margin-top: 20px;
+        }
+        .card {
+            margin-bottom: 20px;
+        }
+        .form-section {
+            padding: 20px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
 
-      {% if table %}
-      <form action="/" method="post" enctype="multipart/form-data">
-         <p>Data Frame</p>
-         {{ table | safe}}
-         <input type="submit" name="action" value="Delete">
-         <input type="submit" name="action" value="Restore">
+<div class="container">
+    <h1 class="my-4 text-center">Data Management Application</h1>
 
-         <p> Export As: </p>
-         <a href="/export/csv">
-            <button> Export CSV </button>
-         </a>
-         <a href="/export/xlsx">
-            <button> Export XLSX </button>
-         </a>
-         <a href="/export/json">
-            <button> Export JSON </button>
-         </a>
-         <a href="/export/html">
-            <button> Export HTML </button>
-         </a>
+    {% if table is none %}
+        <div class="card p-4 shadow-sm text-center">
+            <h2 class="card-title">Upload a Data File</h2>
+            <p class="card-text text-muted">Please upload a file to get started (.csv, .xlsx, .json, .html).</p>
+            <form action="/" method="post" enctype="multipart/form-data" class="mt-3">
+                <div class="input-group mb-3">
+                    <input type="file" class="form-control" name="dataFile" accept=".csv,.xlsx,.json,.html">
+                    <button class="btn btn-primary" type="submit" name="action" value="Upload">Upload</button>
+                </div>
+            </form>
+        </div>
+    {% endif %}
+
+    {% if table is not none %}
+    <div class="card p-4 shadow-sm">
+        <h2 class="card-title mb-4">Current Data Frame</h2>
         
-         <p> Sort and Filters: </p>
-         <label>
-            What row do you want to Sort ?
-            <input type="submit" name="action" value="Sort">
-            <select id="sortColumn" name="sortColumn">
-               {% for column in columns %}
-               <option value="{{column}}"> {{column}} </option>
-               {% endfor %}
-            </select>
-            <select name="ascendingOption" id="ascendingOption">
-               <option value="Ascending"> Ascending </option>
-               <option value="Descending"> Descending </option>
-            </select>
-         </label>
-         
-         <p> </p>
-         <label>
-            What do you wanna filter ?
-            <select id="filterColumn" name="filterColumn">
-               {% for column in columns %}
-               <option value="{{column}}"> {{column}} </option>
-               {% endfor %}
-            </select>
-            <input type="submit" name="action" value="Filter">
-            <input type="submit" name="action" value="Add+">
-            <input type="text" id="filterValue" name="filterValue" placeholder="Value">
-            {% if button %}
-            <input type="text" id="filterValue2" name="filterValue2" placeholder="Second Value">
-            {% endif %}
-         </label>
+        <form action="/" method="post" enctype="multipart/form-data">
+            <div class="table-container mb-3">
+                <table class="table table-striped table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                            {% for head in headers %}
+                                <th scope="col">{{ head }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set ns = namespace(count=0) %}
+                        {% for row in table %}
+                        <tr>
+                            {% for cell in row %}
+                                <td>
+                                    <input type="text" class="form-control" name="data_{{ ns.count }}_{{ loop.index0 }}" value="{{ cell }}">
+                                </td>
+                            {% endfor %}
+                        </tr>
+                        {% set ns.count = ns.count + 1 %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
 
-         <p> Clean wrong formated or empty rows </p>
-         <label>
-            What column has text instead of numbers ?
-            <select id="toNumericColumn" name="toNumericColumn">
-               {% for column in columns %}
-               <option value="{{column}}"> {{column}} </option>
-               {% endfor %}
-            </select>
-            <input type="submit" name="action" value="toNumeric">
-         </label>
+            <div class="d-flex justify-content-center gap-2 mb-4">
+                <button type="submit" name="action" value="Delete" class="btn btn-danger">Delete</button>
+                <button type="submit" name="action" value="Restore" class="btn btn-warning">Restore</button>
+                <button type="submit" name="action" value="Save Changes" class="btn btn-success">Save Changes</button>
+            </div>
+        </form>
+    </div>
 
-         <p>  </p>
-         <label>
-            What column has an empty row ? We can fill it with the most popular value in the row
-            <select id="fillColumn" name="fillColumn">
-               {% for column in columns %}
-               <option value="{{column}}"> {{column}} </option>
-               {% endfor %}
-            </select>
-            <input type="submit" name="action" value="fillColumn">
-         </label>
+    <div class="card p-4 shadow-sm">
+        <h2 class="card-title mb-3">Export Data</h2>
+        <div class="d-flex justify-content-center gap-2">
+            <a href="/export/csv" class="btn btn-info">Export CSV</a>
+            <a href="/export/xlsx" class="btn btn-info">Export XLSX</a>
+            <a href="/export/json" class="btn btn-info">Export JSON</a>
+            <a href="/export/html" class="btn btn-info">Export HTML</a>
+        </div>
+    </div>
 
-         <p></p>
-         <label>
-            Want to remove duplicate registers?
-            <input type="submit" name="action" value="removeDuplicates">
+    <div class="card p-4 shadow-sm">
+        <h2 class="card-title mb-3">Data Operations</h2>
+        <form action="/" method="post" enctype="multipart/form-data">
 
-         </label>
-      </form> {% endif %}
-   </body>
+            <div class="form-section mb-4 p-3 border rounded">
+                <h4 class="mb-3">Sort Data</h4>
+                <div class="input-group">
+                    <label class="input-group-text" for="sortColumn">Sort Column</label>
+                    <select class="form-select" id="sortColumn" name="sortColumn">
+                        {% for head in headers %}
+                            <option value="{{ head }}">{{ head }}</option>
+                        {% endfor %}
+                    </select>
+                    <select class="form-select" name="ascendingOption" id="ascendingOption">
+                        <option value="Ascending">Ascending</option>
+                        <option value="Descending">Descending</option>
+                    </select>
+                    <button class="btn btn-outline-primary" type="submit" name="action" value="Sort">Sort</button>
+                </div>
+            </div>
+
+            <div class="form-section mb-4 p-3 border rounded">
+                <h4 class="mb-3">Filter Data</h4>
+                <div class="input-group mb-3">
+                    <label class="input-group-text" for="filterColumn">Filter Column</label>
+                    <select class="form-select" id="filterColumn" name="filterColumn">
+                        {% for head in headers %}
+                            <option value="{{ head }}">{{ head }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="text" class="form-control" id="filterValue" name="filterValue" placeholder="Value">
+                    {% if button %}
+                        <input type="text" class="form-control" id="filterValue2" name="filterValue2" placeholder="Second Value">
+                    {% endif %}
+                    <button class="btn btn-outline-primary" type="submit" name="action" value="Filter">Filter</button>
+                    <button class="btn btn-outline-secondary" type="submit" name="action" value="Add+">Add +</button>
+                </div>
+            </div>
+
+            <div class="form-section mb-4 p-3 border rounded">
+                <h4 class="mb-3">Clean Data</h4>
+                
+                <div class="mb-3">
+                    <label for="toNumericColumn" class="form-label">Convert to Numeric:</label>
+                    <div class="input-group">
+                        <select class="form-select" id="toNumericColumn" name="toNumericColumn">
+                            {% for head in headers %}
+                                <option value="{{ head }}">{{ head }}</option>
+                            {% endfor %}
+                        </select>
+                        <button class="btn btn-outline-primary" type="submit" name="action" value="toNumeric">Convert</button>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="fillColumn" class="form-label">Fill Missing Values (with mode):</label>
+                    <div class="input-group">
+                        <select class="form-select" id="fillColumn" name="fillColumn">
+                            {% for head in headers %}
+                                <option value="{{ head }}">{{ head }}</option>
+                            {% endfor %}
+                        </select>
+                        <button class="btn btn-outline-primary" type="submit" name="action" value="fillColumn">Fill</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="form-label">Remove Duplicates:</label>
+                    <div class="d-grid">
+                        <button class="btn btn-outline-danger" type="submit" name="action" value="removeDuplicates">Remove Duplicates</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
 </html>

@@ -22,12 +22,16 @@ class dataManager:
         if(self.dataFrame.empty):
             return None
         return self.dataFrame.to_html(classes='table table-striped')
-    def getColumns(self):
-        if(self.dataFrame.empty):
-            return None
-        return self.dataFrame.columns.to_list()
     def fixMissingValue(self,column):
         self.dataFrame[column] = self.dataFrame[column].fillna(self.dataFrame[column].mode().iloc[0])
+    def getArray(self):
+        if(self.dataFrame.empty):
+            return None
+        return self.dataFrame.to_numpy()
+    def getHeaders(self):
+        if(self.dataFrame.empty):
+            return None
+        return self.dataFrame.columns.values
 
         
 

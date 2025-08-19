@@ -19,6 +19,20 @@ def loading():
                     dm.dataFrame = pandas.DataFrame()
                 case "Restore":
                     dm.dataFrame = dm.copy
+                case "Save Changes":
+                    updatedData = []
+                    nrows = dm.dataFrame.shape[0]
+                    ncolms = dm.dataFrame.shape[1]
+
+                    for r in range(nrows):
+                        current_row = []
+                        for c in range(ncolms):
+                            key = f"data_{r}_{c}"
+                            if key in request.form:
+                                current_row.append(request.form[key])
+                        updatedData.append(current_row)
+                    dm.dataFrame = pandas.DataFrame(updatedData,columns=dm.getHeaders())
+                    dm.copy = pandas.DataFrame(updatedData,columns=dm.getHeaders())
                 case "Sort":
                     sortColumn = request.form.get("sortColumn")
                     if(request.form.get("ascendingOption")=="Ascending"):
@@ -46,7 +60,7 @@ def loading():
                     dm.fixMissingValue(fillColumn)
                 case "removeDuplicates":
                     dm.dataFrame = dm.dataFrame.drop_duplicates()
-    return render_template("home.html",table=dm.getHTML(),button=button,columns = dm.getColumns())
+    return render_template("home.html",table=dm.getArray(),button=button,headers = dm.getHeaders())
 
 @app.route("/export/<format>")
 def exportFile(format):
